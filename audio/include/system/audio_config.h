@@ -37,12 +37,16 @@ static inline std::vector<std::string> audio_get_configuration_paths() {
         if (property_get("ro.boot.product.vendor.sku", value, "") <= 0) {
             ret = std::vector<std::string>({"/odm/etc", "/vendor/etc", "/system/etc"});
         } else {
-            ret = std::vector<std::string>({
-                    "/odm/etc",
-                    std::string("/vendor/etc/audio/sku_") + value +
-                           (va_aosp ? "_qssi" : ""),
-                    std::string("/vendor/etc/audio/sku_") + value,
-                    "/vendor/etc", "/system/etc"});
+            if (property_get_bool("ro.vendor.audio.no_sku.support", true)) {
+                ret = std::vector<std::string>({"/odm/etc", "/vendor/etc", "/system/etc"});
+            } else {
+                ret = std::vector<std::string>({
+                        "/odm/etc",
+                        std::string("/vendor/etc/audio/sku_") + value +
+                               (va_aosp ? "_qssi" : ""),
+                        std::string("/vendor/etc/audio/sku_") + value,
+                        "/vendor/etc", "/system/etc"});
+            }
         }
         if (va_aosp) {
             ret.insert(ret.end() - 2, "/vendor/etc/audio");
